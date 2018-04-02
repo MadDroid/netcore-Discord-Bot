@@ -20,7 +20,11 @@ namespace Bot
         private CommandService commands;
         private IServiceProvider services;
 
+#if DEBUG
+        public static char Prefix = '$';
+#else
         public static char Prefix = '!';
+#endif
 
         private async Task MainAsync()
         {
