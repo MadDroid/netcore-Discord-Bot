@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Bot.Helpers;
 using Bot.Models;
 using System.Threading;
+using Bot.Comparers;
 
 namespace Bot.Services
 {
@@ -24,7 +25,7 @@ namespace Bot.Services
 
         #region Private Fields
         private List<Game> games;
-        private HashSet<string> teams;
+        private HashSet<Team> teams = new HashSet<Team>(new TeamComparer());
         private Timer timer;
         private bool firstRun = true;
         #endregion
@@ -40,7 +41,7 @@ namespace Bot.Services
             }
         }
 
-        public List<string> Teams => teams.OrderBy(t => t).ToList();
+        public List<Team> Teams => teams.ToList();
         #endregion
 
         #region Constructor
@@ -77,7 +78,7 @@ namespace Bot.Services
 
             games = await Json.ToObjectAsync<List<Game>>(json);
 
-            teams = await GetTeams(games);
+            await GetTeams();
 
             var gamesList = new Games { GamesList = games, LastUpdated = DateTime.Now };
 
@@ -94,13 +95,13 @@ namespace Bot.Services
             return await Json.ToObjectAsync<Game>(result);
         }
 
-        public async Task AddTeam(string team)
-        {
-            teams.Add(team);
-            var orderedTeam = teams.OrderBy(t => t).ToList();
-            string json = await Json.StringifyAsync(orderedTeam);
-            await File.WriteAllTextAsync(BotConfig.TeamsFile, json);
-        }
+        //public async Task AddTeam(string team)
+        //{
+        //    teams.Add(team);
+        //    var orderedTeam = teams.OrderBy(t => t).ToList();
+        //    string json = await Json.StringifyAsync(orderedTeam);
+        //    await File.WriteAllTextAsync(BotConfig.TeamsFile, json);
+        //}
         #endregion
 
         #region Private Methods
@@ -115,7 +116,7 @@ namespace Bot.Services
                 this.games = games?.GamesList;
 
                 json = await File.ReadAllTextAsync(BotConfig.TeamsFile);
-                this.teams = await Json.ToObjectAsync<HashSet<string>>(json);
+                this.teams = await Json.ToObjectAsync<HashSet<Team>>(json);
 
                 if ((games != null) && (games.LastUpdated.AddMinutes(timeSpan) > DateTime.Now))
                     diff = (games.LastUpdated - DateTime.Now) + TimeSpan.FromMinutes(timeSpan);
@@ -131,20 +132,13 @@ namespace Bot.Services
             this.timer = timer;
         }
 
-        private async Task<HashSet<string>> GetTeams(List<Game> games)
+        private async Task<HashSet<Team>> GetTeams()
         {
-            if (games == null) return new HashSet<string>();
-            if (teams == null)
-                teams = new HashSet<string>();
+            string json = await WebService.GetStringAsync(BaseApi + "teams");
 
-            foreach (var item in games)
-            {
-                teams.Add(item.TeamA);
-                teams.Add(item.TeamB);
-            }
-
-            string json = await Json.StringifyAsync(teams);
-            await File.WriteAllTextAsync(BotConfig.TeamsFile, json);
+            teams = await Json.ToObjectAsync<HashSet<Team>>(json);
+            
+            await File.WriteAllTextAsync(BotConfig.TeamsFile, await Json.StringifyAsync(teams));
             return teams;
         }
         #endregion
