@@ -20,7 +20,7 @@ namespace Bot.Services
 
         public ReminderService(GamesService gamesService)
         {
-            if(!Directory.Exists(BotConfig.DataFolder))
+            if (!Directory.Exists(BotConfig.DataFolder))
             {
                 Directory.CreateDirectory(BotConfig.DataFolder);
                 LoggindService.Log("Diretório de dados criado", GetType(), Discord.LogSeverity.Info);
@@ -79,6 +79,9 @@ namespace Bot.Services
             }
 
             var reminder = new Reminder(game, team);
+            // HACK: Se remove da lista de lembretes quando for acionado o último evento.
+            // TODO: Verificar outra possibilidade, já que essa tira a função da propriedade OnTimeTriggered.
+            reminder.OnTimeTrigger += async (s, a) => await RemoveReminder(reminder);
             await SaveReminder(reminder);
             return (ReminderAnswer.ReminderSet, reminder);
         }
@@ -99,13 +102,33 @@ namespace Bot.Services
             await File.WriteAllTextAsync(BotConfig.RemindersFile, json);
             await LoggindService.Log($"Lembrete para {reminder.Game.ToString()} removido", GetType(), Discord.LogSeverity.Info);
         }
-        
+
+        /// <summary>
+        /// Load all reminders from storage and clean everything that has already passed.
+        /// </summary>
+        /// <returns></returns>
         private async Task LoadReminders()
         {
             var json = await File.ReadAllTextAsync(BotConfig.RemindersFile);
             reminders = await Json.ToObjectAsync<List<Reminder>>(json);
             if (reminders == null)
                 reminders = new List<Reminder>();
+            await CleanReminders();
+        }
+
+        /// <summary>
+        /// Clean all reminders that has already passed.
+        /// </summary>
+        /// <returns></returns>
+        public async Task CleanReminders()
+        {
+            int removed = reminders.RemoveAll(r => r.OnTimeTriggered);
+
+            if (removed > 0)
+            {
+                var json = await Json.StringifyAsync(Reminders);
+                await File.WriteAllTextAsync(BotConfig.RemindersFile, json);
+            }
         }
     }
 
@@ -152,10 +175,17 @@ namespace Bot.Services
             this.team = team;
             var diff = game.MatchDate - DateTime.Now;
 
+            // Se diff for negativo, o jogo já aconteceu.
+            if (diff < new TimeSpan(0))
+            {
+                onTimeTriggered = true;
+                return;
+            }
+
             onTimeTimer = new Timer((e) =>
             {
-                OnTrigger(game);
                 onTimeTriggered = true;
+                OnTrigger(game);
                 // TODO: Criar lembrete para o próximo jogo
             }, null, diff, new TimeSpan(-1));
 
@@ -182,14 +212,14 @@ namespace Bot.Services
 
             tenTimeTimer = new Timer((e) =>
             {
-                TenTrigger(game);
                 tenTimeTriggered = true;
+                TenTrigger(game);
             }, null, tenTime, new TimeSpan(-1));
 
             halfTimeTimer = new Timer((e) =>
             {
-                HalfTrigger(game);
                 halfTimeTriggered = true;
+                HalfTrigger(game);
             }, null, halfTime, new TimeSpan(-1));
 
             LoggindService.Log($"Novo lembrete {game.ToString()}", GetType(), Discord.LogSeverity.Info);
