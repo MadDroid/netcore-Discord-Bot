@@ -1,39 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Newtonsoft.Json;
 using System.Linq;
-using System.Text;
 
 namespace Bot.Models
 {
     public class Team
     {
-        #region Fields
-        private string fullName;
-        private HashSet<string> aliases = new HashSet<string>(); 
-        #endregion
+        // TODO: Add Aliases
 
-        #region Properties
-        public string FullName => fullName;
-        public string[] Aliases => aliases.ToArray(); 
-        #endregion
+        [JsonProperty("teamId")]
+        public int Id { get; set; }
 
-        #region Constructors
-        public Team(string fullName) : this(fullName, new string[0]) { }
+        [JsonProperty("teamName")]
+        public string Name { get; set; }
 
-        public Team(string fullName, params string[] aliases)
-        {
-            this.fullName = fullName;
-            foreach (string aliase in aliases)
-            {
-                this.aliases.Add(aliase);
-            }
-        }
-        #endregion
+        [JsonProperty("teamCountry")]
+        public string Country { get; set; }
 
-        #region Methods
-        public bool AddAliase(string aliase) => aliases.Add(aliase);
-
-        public bool RemoveAliase(string aliase) => aliases.Remove(aliase); 
-        #endregion
+        [JsonProperty("teamLogo")]
+        public string Logo { get; set; }
     }
 }

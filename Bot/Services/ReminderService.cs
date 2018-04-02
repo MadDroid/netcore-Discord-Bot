@@ -58,22 +58,22 @@ namespace Bot.Services
         /// <param name="game">O jogo para ser definido um lembrete.</param>
         /// <param name="team">O time para ser defiindo um lembrete.</param>
         /// <returns></returns>
-        public async Task<(ReminderAnswer Answer, Reminder Reminder)> AddReminder(Game game, string team)
+        public async Task<(ReminderAnswer Answer, Reminder Reminder)> AddReminder(Game game, Team team)
         {
             // Verifica se o lembrete já foi definido.
-            var existingReminder = Reminders.FirstOrDefault(g => g.Game.TeamA.ToLower() == team.ToLower() || g.Game.TeamB == team.ToLower());
+            var existingReminder = Reminders.FirstOrDefault(g => g.Game.TeamAId == team.Id || g.Game.TeamBId == team.Id);
             if (existingReminder != null)
                 return (ReminderAnswer.ExistingReminder, existingReminder);
 
-            team = gamesService.Teams.FirstOrDefault(t => t.ToLower() == team.ToLower());
+            team = gamesService.Teams.FirstOrDefault(t => t.Id == team.Id);
 
             // Verifica se foi passado um jogo, caso não, procura pelo time.
             if (game == null)
             {
                 // Verifica se o time existe.
-                if (string.IsNullOrEmpty(team))
+                if (team == null)
                     return (ReminderAnswer.TeamNotFound, null);
-                game = gamesService.Games.FirstOrDefault(t => t.TeamA == team || t.TeamB == team);
+                game = gamesService.Games.FirstOrDefault(t => t.TeamAId == team.Id || t.TeamBId == team.Id);
                 if (game == null)
                     return (ReminderAnswer.NoUpcomingGames, null);
             }
@@ -86,7 +86,7 @@ namespace Bot.Services
             return (ReminderAnswer.ReminderSet, reminder);
         }
 
-        public async Task<(ReminderAnswer Answer, Reminder Reminder)> AddReminder(string team) => await AddReminder(null, team);
+        public async Task<(ReminderAnswer Answer, Reminder Reminder)> AddReminder(Team team) => await AddReminder(null, team);
 
         private async Task SaveReminder(Reminder reminder)
         {
@@ -142,12 +142,12 @@ namespace Bot.Services
         [JsonIgnore]
         public bool HalfTimeTriggered => halfTimeTriggered;
         public Game Game => game;
-        public string Team => team;
+        public Team Team => team;
         #endregion
 
         #region Fields
         private Game game;
-        private string team;
+        private Team team;
         private bool onTimeTriggered;
         private bool tenTimeTriggered;
         private bool halfTimeTriggered;
@@ -168,7 +168,7 @@ namespace Bot.Services
         public void OtherTrigger(Game game, TimeSpan timeSpan) => OtherTimeTrigger?.Invoke(this, new ReminderEventArgs { Game = game, TimeSpan = timeSpan });
         #endregion
 
-        public Reminder(Game game, string team)
+        public Reminder(Game game, Team team)
         {
             // TODO: Verificar possibilidade de usar System.Timers.Timer
             this.game = game;
