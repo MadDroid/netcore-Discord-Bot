@@ -9,12 +9,12 @@ using System.IO;
 
 namespace Bot.Services
 {
-    public class LoggindService
+    public class LoggingService
     {
         DiscordSocketClient client;
         CommandService commands;
 
-        public LoggindService(DiscordSocketClient client, CommandService commands)
+        public LoggingService(DiscordSocketClient client, CommandService commands)
         {
             this.client = client;
             this.commands = commands;
@@ -48,13 +48,13 @@ namespace Bot.Services
             if (!Directory.Exists(BotConfig.LogDirectory))
             {
                 Directory.CreateDirectory(BotConfig.LogDirectory);
-                Log("Diretótio de logs criado", typeof(LoggindService), LogSeverity.Info);
+                Log("Diretótio de logs criado", typeof(LoggingService), LogSeverity.Info);
             }
 
             if (!File.Exists(BotConfig.LogFile))
             {
                 File.Create(BotConfig.LogFile).Dispose();
-                Log("Arquivo de logs criado", typeof(LoggindService), LogSeverity.Info);
+                Log("Arquivo de logs criado", typeof(LoggingService), LogSeverity.Info);
             }
 
             string logText = $"{DateTime.Now.ToLongTimeString()} [{severity}] {type.Name}: {msg}";

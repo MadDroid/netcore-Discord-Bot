@@ -23,13 +23,13 @@ namespace Bot.Services
             if (!Directory.Exists(BotConfig.DataFolder))
             {
                 Directory.CreateDirectory(BotConfig.DataFolder);
-                LoggindService.Log("Diretório de dados criado", GetType(), Discord.LogSeverity.Info);
+                LoggingService.Log("Diretório de dados criado", GetType(), Discord.LogSeverity.Info);
             }
 
             if (!File.Exists(BotConfig.RemindersFile))
             {
                 File.Create(BotConfig.RemindersFile).Dispose();
-                LoggindService.Log("Arquivo de lembretes criado", GetType(), Discord.LogSeverity.Info);
+                LoggingService.Log("Arquivo de lembretes criado", GetType(), Discord.LogSeverity.Info);
             }
 
             this.gamesService = gamesService;
@@ -100,7 +100,7 @@ namespace Bot.Services
             reminders.Remove(reminder);
             var json = await Json.StringifyAsync(reminders);
             await File.WriteAllTextAsync(BotConfig.RemindersFile, json);
-            await LoggindService.Log($"Lembrete para {reminder.Game.ToString()} removido", GetType(), Discord.LogSeverity.Info);
+            await LoggingService.Log($"Lembrete para {reminder.Game.ToString()} removido", GetType(), Discord.LogSeverity.Info);
         }
 
         /// <summary>
@@ -197,7 +197,7 @@ namespace Bot.Services
                 tenTime = new TimeSpan(-1);
                 tenTimeTriggered = true;
                 SetOtherTime(game, tenTime);
-                LoggindService.Log("Less than Ten minutes left", GetType(), Discord.LogSeverity.Info);
+                LoggingService.Log("Less than Ten minutes left", GetType(), Discord.LogSeverity.Info);
             }
 
             if (halfTime < TimeSpan.FromMinutes(0))
@@ -207,7 +207,7 @@ namespace Bot.Services
                     SetOtherTime(game, diff);
 
                 halfTimeTriggered = true;
-                LoggindService.Log("Less than Thirty minutes left", GetType(), Discord.LogSeverity.Info);
+                LoggingService.Log("Less than Thirty minutes left", GetType(), Discord.LogSeverity.Info);
             }
 
             tenTimeTimer = new Timer((e) =>
@@ -222,7 +222,7 @@ namespace Bot.Services
                 HalfTrigger(game);
             }, null, halfTime, new TimeSpan(-1));
 
-            LoggindService.Log($"Novo lembrete {game.ToString()}", GetType(), Discord.LogSeverity.Info);
+            LoggingService.Log($"Novo lembrete {game.ToString()}", GetType(), Discord.LogSeverity.Info);
         }
 
         private void SetOtherTime(Game game, TimeSpan timeSpan)
@@ -281,7 +281,7 @@ namespace Bot.Services
                 onTimeTriggered = true;
             }
 
-            LoggindService.Log($"Updated reminder - MatchId: {game.MatchId}", GetType(), Discord.LogSeverity.Info);
+            LoggingService.Log($"Updated reminder - MatchId: {game.MatchId}", GetType(), Discord.LogSeverity.Info);
         }
 
         public class ReminderEventArgs : EventArgs

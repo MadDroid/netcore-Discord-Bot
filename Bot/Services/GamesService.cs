@@ -50,19 +50,19 @@ namespace Bot.Services
             if (!Directory.Exists(BotConfig.DataFolder))
             {
                 Directory.CreateDirectory(BotConfig.DataFolder);
-                LoggindService.Log("Diretório de dados criado", GetType(), Discord.LogSeverity.Info);
+                LoggingService.Log("Diretório de dados criado", GetType(), Discord.LogSeverity.Info);
             }
 
             if (!File.Exists(BotConfig.GamesFile))
             {
                 File.Create(BotConfig.GamesFile).Dispose();
-                LoggindService.Log("Arquivo de jogos criado", GetType(), Discord.LogSeverity.Info);
+                LoggingService.Log("Arquivo de jogos criado", GetType(), Discord.LogSeverity.Info);
             }
 
             if (!File.Exists(BotConfig.TeamsFile))
             {
                 File.Create(BotConfig.TeamsFile).Dispose();
-                LoggindService.Log("Arquivo de times criado", GetType(), Discord.LogSeverity.Info);
+                LoggingService.Log("Arquivo de times criado", GetType(), Discord.LogSeverity.Info);
             }
 
             ActivateTimer().GetAwaiter().GetResult();
@@ -74,7 +74,7 @@ namespace Bot.Services
         {
             var json = await WebService.GetStringAsync(BaseApi + futureMatch);
 
-            await LoggindService.Log("Jogos atualizados", GetType(), Discord.LogSeverity.Info);
+            await LoggingService.Log("Jogos atualizados", GetType(), Discord.LogSeverity.Info);
 
             games = await Json.ToObjectAsync<List<Game>>(json);
 
@@ -122,7 +122,7 @@ namespace Bot.Services
                     diff = (games.LastUpdated - DateTime.Now) + TimeSpan.FromMinutes(timeSpan);
             }
 
-            await LoggindService.Log($"Timer ativado para {diff}", GetType(), Discord.LogSeverity.Info);
+            await LoggingService.Log($"Timer ativado para {diff}", GetType(), Discord.LogSeverity.Info);
             var timer = new Timer(async (e) =>
             {
                 await FetchGames();

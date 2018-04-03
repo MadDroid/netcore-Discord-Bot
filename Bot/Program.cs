@@ -35,11 +35,12 @@ namespace Bot
                 .AddSingleton(client)
                 .AddSingleton(commands)
                 .AddSingleton<GamesService>()
-                .AddSingleton<LoggindService>()
+                .AddSingleton<LoggingService>()
                 .AddSingleton<ReminderService>()
+                .AddSingleton<AudioService>()
                 .BuildServiceProvider();
 
-            services.GetRequiredService<LoggindService>();
+            services.GetRequiredService<LoggingService>();
             services.GetRequiredService<GamesService>();
             services.GetRequiredService<ReminderService>();
 
@@ -76,7 +77,7 @@ namespace Bot
                 var result = await commands.ExecuteAsync(context, argPos, services);
 
                 if (!result.IsSuccess)
-                    await LoggindService.Log(result.ErrorReason, result.GetType(), LogSeverity.Info);
+                    await LoggingService.Log(result.ErrorReason, result.GetType(), LogSeverity.Info);
             }
         }
     }

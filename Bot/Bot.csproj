@@ -32,4 +32,8 @@
     </EmbeddedResource>
   </ItemGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy libs\libopus.dll $(OutDir)opus.dll&#xD;&#xA;copy libs\libsodium.dll $(OutDir)libsodium.dll&#xD;&#xA;copy libs\ffmpeg.exe $(OutDir)ffmpeg.exe" />
+  </Target>
+
 </Project>

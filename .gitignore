@@ -264,3 +264,4 @@ __pycache__/
 *.Designer.cs
 /Bot/build-release.bat
 Bot.Tests/
+/Bot/libs/zip

@@ -103,7 +103,7 @@ namespace Bot.Modules
 
             //await ReplyAsync(string.IsNullOrEmpty(reply.ToString()) ? "Sem próximos jogos ou time não encontrado." : "```cpp\n" + reply.ToString() + "```");
 
-            await LoggindService.Log($"{Context.User.Username}#{Context.User.Discriminator} solicitou {nameof(GamesAsync)}", GetType(), Discord.LogSeverity.Info);
+            await LoggingService.Log($"{Context.User.Username}#{Context.User.Discriminator} solicitou {nameof(GamesAsync)}", GetType(), Discord.LogSeverity.Info);
         }
 
         [Summary("Obtém todos os times registrados")]
@@ -123,7 +123,7 @@ namespace Bot.Modules
 
             await ReplyAsync("Serviço desativado temporáriamente");
 
-            await LoggindService.Log($"{Context.User.Username}#{Context.User.Discriminator} solicitou {nameof(TeamsAsync)}", GetType(), Discord.LogSeverity.Info);
+            await LoggingService.Log($"{Context.User.Username}#{Context.User.Discriminator} solicitou {nameof(TeamsAsync)}", GetType(), Discord.LogSeverity.Info);
         }
 
         //[Summary("Adiciona um time aos times registrados")]
@@ -172,7 +172,7 @@ namespace Bot.Modules
 
                     await ReplyAsync($"Lembrete definido para {response.Reminder.Team.Name}. Próximo jogo {response.Reminder.Game.ToString()} {response.Reminder.Game.MatchDate.ToString("dd/MM/yyyy HH:mm")}");
 
-                    await LoggindService.Log($"{Context.User.Username}#{Context.User.Discriminator} criou um novo lembrete para {response.Reminder.Team}", GetType(), Discord.LogSeverity.Info);
+                    await LoggingService.Log($"{Context.User.Username}#{Context.User.Discriminator} criou um novo lembrete para {response.Reminder.Team}", GetType(), Discord.LogSeverity.Info);
                     break;
                 case ReminderAnswer.ExistingReminder:
                     await ReplyAsync($"Lembrete já definido para {response.Reminder.Team}. Próximo jogo {response.Reminder.Game.ToString()} {response.Reminder.Game.MatchDate.ToString("dd/MM/yyyy HH:mm")}");
@@ -241,7 +241,7 @@ namespace Bot.Modules
                 {
                     await reminderService.RemoveReminder(reminder);
                     await ReplyAsync($"Lembrete removido para {team}");
-                    await LoggindService.Log($"{Context.User.Username}#{Context.User.Discriminator} removeu o lembrete para {team}", GetType(), Discord.LogSeverity.Info);
+                    await LoggingService.Log($"{Context.User.Username}#{Context.User.Discriminator} removeu o lembrete para {team}", GetType(), Discord.LogSeverity.Info);
                 }
             }
         }
