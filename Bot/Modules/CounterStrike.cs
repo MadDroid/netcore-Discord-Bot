@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using Discord.WebSocket;
 using Bot.Models;
+using Bot.Helpers;
 
 namespace Bot.Modules
 {
@@ -32,25 +33,22 @@ namespace Bot.Modules
 
         [Summary("Obtém próximos jogos de um time usando o nome")]
         [Command("jogos"), RequireUserPermission(Discord.ChannelPermission.SendTTSMessages)]
-        public async Task GamesAsync([Remainder][Summary("O nome do time para obter os próximos jogos")]string team)
+        public async Task GamesAsync([Remainder][Summary("O nome do time para obter os próximos jogos")]string name)
         {
-            var theTeam = gamesService.Teams.FirstOrDefault(t => t.Name.ToLower() == team.ToLower());
-            if (theTeam == null)
-                await ReplyAsync("Time inexistente");
+            if (GetTeam(name, out Team team))
+                await GamesAsync(team);
             else
-                await GamesAsync(theTeam);
+                await ReplyAsync("Time inexistente");
         }
 
         [Summary("Obtém próximos jogos de um time usando a id")]
         [Command("jogos")]
         public async Task GamesAsync([Summary("A id do time para obter os próximos jogos")]int id)
         {
-            var team = gamesService.Teams.FirstOrDefault(t => t.Id == id);
-
-            if (team == null)
-                await ReplyAsync("Time inexistente");
-            else
+            if(GetTeam(id, out Team team))
                 await GamesAsync(team);
+            else
+                await ReplyAsync("Time inexistente");
         }
 
         public async Task GamesAsync(Team team)
@@ -141,22 +139,20 @@ namespace Bot.Modules
         //}
 
         [Command("reminder"), Alias("lembrete"), Summary("Adiciona um lembrete para o time especificado"), RequireUserPermission(Discord.ChannelPermission.SendTTSMessages)]
-        public async Task ReminderAsync([Remainder]string teamName)
+        public async Task ReminderAsync([Remainder]string name)
         {
-            var team = gamesService.Teams.FirstOrDefault(t => t.Name.ToLower() == teamName.ToLower());
-            if (team == null)
-                await ReplyAsync("Time inexistente");
+            if (GetTeam(name, out Team result))
+                await ReminderAsync(result);
             else
-                await ReminderAsync(team);
+                await ReplyAsync("Time inexistente");
         }
 
         public async Task ReminderAsync(int id)
         {
-            var team = gamesService.Teams.FirstOrDefault(t => t.Id == id);
-            if (team == null)
-                await ReplyAsync("Time inexistente");
-            else
+            if (GetTeam(id, out Team team))
                 await ReminderAsync(team);
+            else
+                await ReplyAsync("Time inexistente");
         }
 
         public async Task ReminderAsync(Team team)
@@ -209,23 +205,21 @@ namespace Bot.Modules
         }
 
         [Command("remreminder"), Alias("remlembrete"), RequireUserPermission(Discord.ChannelPermission.SendTTSMessages)]
-        public async Task RemoveReminderAsync([Remainder]string team)
+        public async Task RemoveReminderAsync([Remainder]string name)
         {
-            var theTeam = gamesService.Teams.FirstOrDefault(t => t.Name.ToLower() == team.ToLower());
-            if (theTeam == null)
-                await ReplyAsync("Time inexistente");
+            if (GetTeam(name, out Team team))
+                await RemoveReminderAsync(team);
             else
-                await RemoveReminderAsync(theTeam);
+                await ReplyAsync("Time inexistente");
         }
 
         [Command("remreminder"), Alias("remlembrete"), RequireUserPermission(Discord.ChannelPermission.SendTTSMessages)]
         public async Task RemoveReminderAsync(int id)
         {
-            var team = gamesService.Teams.FirstOrDefault(t => t.Id == id);
-            if (team == null)
-                await ReplyAsync("Time inexistente");
-            else
+            if (GetTeam(id, out Team team))
                 await RemoveReminderAsync(team);
+            else
+                await ReplyAsync("Time inexistente");
         }
 
         public async Task RemoveReminderAsync(Team team)
@@ -251,6 +245,30 @@ namespace Bot.Modules
         public async Task UpdateAsync()
         {
             await gamesService.FetchGames();
+        }
+
+        private bool GetTeam(string name, out Team team)
+        {
+            if(gamesService.Teams.TryGetItem(t => t.Name.ToLower() == name.ToLower(), out Team result))
+            {
+                team = result;
+                return true;
+            }
+
+            team = default(Team);
+            return false;
+        }
+
+        private bool GetTeam(int id, out Team team)
+        {
+            if (gamesService.Teams.TryGetItem(t => t.Id == id, out Team result))
+            {
+                team = result;
+                return true;
+            }
+
+            team = default(Team);
+            return false;
         }
     }
 }
