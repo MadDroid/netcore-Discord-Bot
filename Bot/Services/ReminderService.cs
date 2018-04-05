@@ -20,17 +20,8 @@ namespace Bot.Services
 
         public ReminderService(GamesService gamesService)
         {
-            if (!Directory.Exists(BotConfig.DataFolder))
-            {
-                Directory.CreateDirectory(BotConfig.DataFolder);
-                LoggindService.Log("Diretório de dados criado", GetType(), Discord.LogSeverity.Info);
-            }
-
-            if (!File.Exists(BotConfig.RemindersFile))
-            {
-                File.Create(BotConfig.RemindersFile).Dispose();
-                LoggindService.Log("Arquivo de lembretes criado", GetType(), Discord.LogSeverity.Info);
-            }
+            StorageService.CreateDirectory(BotConfig.DataFolder).GetAwaiter().GetResult();
+            StorageService.CreateFile(BotConfig.RemindersFile).GetAwaiter().GetResult();
 
             this.gamesService = gamesService;
             this.gamesService.GotGames += GamesService_GotGames;

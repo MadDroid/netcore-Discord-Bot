@@ -47,23 +47,9 @@ namespace Bot.Services
         #region Constructor
         public GamesService()
         {
-            if (!Directory.Exists(BotConfig.DataFolder))
-            {
-                Directory.CreateDirectory(BotConfig.DataFolder);
-                LoggindService.Log("Diretório de dados criado", GetType(), Discord.LogSeverity.Info);
-            }
-
-            if (!File.Exists(BotConfig.GamesFile))
-            {
-                File.Create(BotConfig.GamesFile).Dispose();
-                LoggindService.Log("Arquivo de jogos criado", GetType(), Discord.LogSeverity.Info);
-            }
-
-            if (!File.Exists(BotConfig.TeamsFile))
-            {
-                File.Create(BotConfig.TeamsFile).Dispose();
-                LoggindService.Log("Arquivo de times criado", GetType(), Discord.LogSeverity.Info);
-            }
+            StorageService.CreateDirectory(BotConfig.DataFolder).GetAwaiter().GetResult();
+            StorageService.CreateFile(BotConfig.GamesFile).GetAwaiter().GetResult();
+            StorageService.CreateFile(BotConfig.TeamsFile).GetAwaiter().GetResult();
 
             ActivateTimer().GetAwaiter().GetResult();
         }

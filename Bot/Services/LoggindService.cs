@@ -25,17 +25,8 @@ namespace Bot.Services
 
         private Task OnLogAsync(LogMessage arg)
         {
-            if (!Directory.Exists(BotConfig.LogDirectory))
-            {
-                Directory.CreateDirectory(BotConfig.LogDirectory);
-                Log("Diretótio de logs criado", GetType(), LogSeverity.Info);
-            }
-
-            if (!File.Exists(BotConfig.LogFile))
-            {
-                File.Create(BotConfig.LogFile).Dispose();
-                Log("Arquivo de logs criado", GetType(), LogSeverity.Info);
-            }
+            StorageService.CreateDirectory(BotConfig.LogDirectory).GetAwaiter().GetResult();
+            StorageService.CreateFile(BotConfig.LogFile).GetAwaiter().GetResult();
 
             string logText = $"{DateTime.Now.ToLongTimeString()} [{arg.Severity}] {arg.Source}: {arg.Exception?.ToString() ?? arg.Message}";
             File.AppendAllText(BotConfig.LogFile, logText + "\n");
@@ -45,17 +36,8 @@ namespace Bot.Services
 
         public static Task Log(string msg, Type type, LogSeverity severity)
         {
-            if (!Directory.Exists(BotConfig.LogDirectory))
-            {
-                Directory.CreateDirectory(BotConfig.LogDirectory);
-                Log("Diretótio de logs criado", typeof(LoggindService), LogSeverity.Info);
-            }
-
-            if (!File.Exists(BotConfig.LogFile))
-            {
-                File.Create(BotConfig.LogFile).Dispose();
-                Log("Arquivo de logs criado", typeof(LoggindService), LogSeverity.Info);
-            }
+            StorageService.CreateDirectory(BotConfig.LogDirectory).GetAwaiter().GetResult();
+            StorageService.CreateFile(BotConfig.LogFile).GetAwaiter().GetResult();
 
             string logText = $"{DateTime.Now.ToLongTimeString()} [{severity}] {type.Name}: {msg}";
 
